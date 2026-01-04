@@ -14,7 +14,7 @@ load_dotenv()
 # -----------------------------
 # OpenAI client
 # -----------------------------
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 
 # -----------------------------
@@ -175,3 +175,4 @@ with tabs[1]:
             st.warning("No resume metadata found in this PDF")
 
         os.unlink(inspect_path)
+
