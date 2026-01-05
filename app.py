@@ -128,7 +128,7 @@ with tab1:
             st.download_button(
                 "⬇ Download Updated Resume",
                 f,
-                file_name="resume_with_metadata.pdf",
+                file_name=pdf_path,
                 mime="application/pdf"
             )
 
@@ -244,3 +244,4 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
