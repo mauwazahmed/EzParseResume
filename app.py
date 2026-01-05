@@ -1,178 +1,246 @@
 import streamlit as st
+import fitz  # PyMuPDF
+import pikepdf
 import json
 import base64
 import zlib
 import tempfile
 import os
-from dotenv import load_dotenv
-
-import pikepdf
-import fitz  # PyMuPDF
 from openai import OpenAI
 
-load_dotenv()
-# -----------------------------
-# OpenAI client
-# -----------------------------
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+# ---------------- CONFIG ----------------
+XMP_NAMESPACE = "https://example.com/ai-resume"
 
+client = OpenAI(api_key=st.secrets.get("OPENAI_API_KEY"))
 
-# -----------------------------
-# Encode / Decode metadata
-# -----------------------------
-def encode_metadata(data: dict) -> str:
-    raw = json.dumps(data, separators=(",", ":")).encode("utf-8")
-    compressed = zlib.compress(raw, 9)
-    return base64.b64encode(compressed).decode("utf-8")
+# ---------------- HELPERS ----------------
 
-
-def decode_metadata(blob: str) -> dict:
-    decoded = base64.b64decode(blob)
-    decompressed = zlib.decompress(decoded)
-    return json.loads(decompressed)
-
-
-# -----------------------------
-# Extract raw text from PDF
-# -----------------------------
-def extract_pdf_text(pdf_path: str) -> str:
+def extract_visible_text(pdf_path):
     doc = fitz.open(pdf_path)
-    text = []
+    return "\n".join(page.get_text() for page in doc)
+
+def has_metadata_marker(text):
+    return METADATA_MARKER in text
+
+def extract_xmp_metadata(pdf_path):
+    with pikepdf.open(pdf_path) as pdf:
+        xmp = pdf.open_metadata()
+        payload = xmp.get("resume:payload")
+        if not payload:
+            return None
+
+        decoded = zlib.decompress(base64.b64decode(payload)).decode()
+        return json.loads(decoded)
+
+def embed_xmp_metadata(pdf_path, metadata_json):
+    encoded = base64.b64encode(
+        zlib.compress(json.dumps(metadata_json).encode())
+    ).decode()
+
+    with pikepdf.open(pdf_path, allow_overwriting_input=True) as pdf:
+        with pdf.open_metadata() as meta:
+            meta["resume:version"] = "1"
+            meta["resume:format"] = "json+zlib+base64"
+            meta["resume:payload"] = encoded
+        pdf.save(pdf_path)
+
+def add_footer_marker(pdf_path):
+    doc = fitz.open(pdf_path)
+
     for page in doc:
-        text.append(page.get_text())
-    return "\n".join(text)
+        page.insert_text(
+            (10, page.rect.height - 10),
+            METADATA_MARKER,
+            fontsize=5,
+            color=(1, 1, 1)  # white
+        )
+
+    doc.saveIncr()
 
 
-# -----------------------------
-# Parse resume using OpenAI
-# -----------------------------
 def parse_resume_with_openai(raw_text: str) -> dict:
-    prompt = f"""
-You are a resume parser.
-Extract all resume details and return ONLY valid JSON.
-For dates or years, use start_date and end_date fields
-Use clear key-value pairs.
-Do not include explanations.
-
-Resume Text:
-\"\"\"
-{raw_text}
-\"\"\"
-"""
+    system_prompt = '''
+    You are a resume parser. Extract all resume details including headers and corresponding information.
+For dates or years, use start_date and end_date fields. Use clear key-value pairs.
+Do not include explanations. Return the output in JSON format only.
+'''
+    prompt = f"""{raw_text}"""
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-4.1-nano",
         temperature=0,
+        response_format={"type": "json_object"},
         messages=[
-            {"role": "system", "content": "You output only JSON."},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt}
         ]
     )
 
     return json.loads(response.choices[0].message.content)
 
+# ---------------- UI ----------------
 
-# -----------------------------
-# Embed metadata into PDF
-# -----------------------------
-def embed_metadata(input_pdf, payload, output_pdf):
-    with pikepdf.open(input_pdf) as pdf:
-        with pdf.open_metadata(set_pikepdf_as_editor=False) as xmp:
-            xmp["resume:payload"] = payload
-
-        pdf.save(output_pdf)
-
-
-# -----------------------------
-# Read metadata from PDF
-# -----------------------------
-def read_metadata(pdf_path):
-    with pikepdf.open(pdf_path) as pdf:
-        xmp = pdf.open_metadata()
-        if "resume:payload" in xmp:
-            return decode_metadata(xmp["resume:payload"])
-    return None
-
-
-# =============================
-# Streamlit UI
-# =============================
-st.set_page_config(page_title="Resume Metadata Editor", layout="wide")
-st.title("📄 Resume Parser & Metadata Embedder (OpenAI)")
-
-tabs = st.tabs(["Upload & Edit Resume", "Inspect PDF Metadata"])
+st.set_page_config(page_title="IRIS", layout="wide")
+st.title("IRIS — Intelligent Resume Interchange Standard")
+tab1, tab2 = st.tabs(["Candidate", "Recruiter / ATS Docs"])
 
 # ======================================================
-# TAB 1 — Upload, Parse, Edit, Embed
+# TAB 1 — CANDIDATE
 # ======================================================
-with tabs[0]:
-    uploaded_pdf = st.file_uploader("Upload Resume PDF", type="pdf")
 
-    if uploaded_pdf:
+with tab1:
+    st.header("Welcome to IRIS!")
+    uploaded = st.file_uploader("Upload PDF resume", type=["pdf"], help="Upload your resume in PDF format only")
+    if uploaded:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-            tmp.write(uploaded_pdf.read())
-            tmp_path = tmp.name
+            tmp.write(uploaded.read())
+            pdf_path = tmp.name
 
-        st.success("PDF uploaded")
+        text = extract_visible_text(pdf_path)
+        metadata = extract_xmp_metadata(pdf_path)
+        if metadata is not None:
+            st.success("✅ Parsed metadata detected in resume")
 
-        if st.button("🔍 Parse Resume using OpenAI"):
-            with st.spinner("Extracting & parsing resume..."):
-                raw_text = extract_pdf_text(tmp_path)
-                print(raw_text)
-                parsed_json = parse_resume_with_openai(raw_text)
+        else:
+            st.warning("❌ The resume does not have parsed metadata.")
+            metadata = {}
 
-            st.session_state["parsed_json"] = parsed_json
+            if st.button("🔍 Parse Resume with AI"):
+                with st.spinner("Parsing resume..."):
+                    metadata = parse_resume_with_openai(text)
 
-        if "parsed_json" in st.session_state:
-            edited_json = st.text_area(
-                "Edit Parsed Resume JSON",
-                value=json.dumps(st.session_state["parsed_json"], indent=2),
-                height=400
+        st.subheader("📦 Resume Metadata (Editable)")
+        metadata_str = st.text_area(
+            "Edit metadata JSON",
+            json.dumps(metadata, indent=4),
+            height=400
+        )
+
+        if st.button("💾 Save & Embed Metadata"):
+            try:
+                final_metadata = json.loads(metadata_str)
+                embed_xmp_metadata(pdf_path, final_metadata)
+                st.success("Metadata embedded successfully!")
+            except Exception as e:
+                st.error(f"Error: {e}")
+
+        with open(pdf_path, "rb") as f:
+            st.download_button(
+                "⬇ Download Updated Resume",
+                f,
+                file_name="resume_with_metadata.pdf",
+                mime="application/pdf"
             )
 
-            if st.button("💾 Save & Embed Metadata"):
-                final_json = json.loads(edited_json)
-                payload = encode_metadata(final_json)
-
-                output_pdf = tempfile.NamedTemporaryFile(
-                    delete=False, suffix=".pdf"
-                ).name
-
-                embed_metadata(tmp_path, payload, output_pdf)
-
-                st.success("Metadata embedded successfully")
-
-                with open(output_pdf, "rb") as f:
-                    st.download_button(
-                        "⬇️ Download Final PDF",
-                        f,
-                        file_name="resume_with_metadata.pdf"
-                    )
-
-        os.unlink(tmp_path)
-
 # ======================================================
-# TAB 2 — Inspect Metadata
+# TAB 2 — RECRUITER / ATS DOCS
 # ======================================================
-with tabs[1]:
-    inspect_pdf = st.file_uploader(
-        "Upload PDF to Inspect Metadata",
-        type="pdf",
-        key="inspect"
-    )
 
-    if inspect_pdf:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-            tmp.write(inspect_pdf.read())
-            inspect_path = tmp.name
+with tab2:
+    doc_text= """
+How Recruiter ATS Can Use IRIS
+------------------------------
 
-        metadata = read_metadata(inspect_path)
+Overview
+----
+This resume may contain machine-readable structured metadata embedded
+inside the PDF using XMP metadata.
 
-        if metadata:
-            st.success("Metadata found!")
-            st.json(metadata)
-        else:
-            st.warning("No resume metadata found in this PDF")
+The purpose of this metadata is to:
+- Reduce resume parsing errors
+- Eliminate repeated parsing
+- Improve candidate data accuracy
+- Remain fully backward-compatible with existing ATS systems
 
-        os.unlink(inspect_path)
 
+Recommended ATS Pipeline
+-----------------------
+    Resume Upload
+        ↓
+    Check for XMP Metadata
+        ↓
+    IF FOUND:
+        - Extract XMP metadata
+        - Decode structured JSON payload
+        - Skip re-parsing
+    ELSE:
+        - Use existing resume parser
+
+
+    
+Metadata Storage Format
+----------------------
+Storage Method:
+- XMP metadata embedded inside the PDF
+- Namespace-based keys
+- Versioned payload
+
+Encoding Method:
+- JSON
+- zlib compression
+- Base64 encoding
+
+
+
+Why This Works?
+--------------
+- No breaking changes to ingestion pipelines
+- Metadata extraction is cheap and deterministic
+- Eliminates layout-based parsing failures
+- Resume remains human-readable simultaneously becoming machine-readable
+- Helps candidates add/edit information in metadata without cluttering the visual resume
+- Saves cost on the AI parsing side for recruiters
+
+
+
+"""
+    st.markdown(doc_text)
+    st.subheader("Python Code to Extract & Decode Metadata")
+    st.code('''
+import pikepdf
+import base64
+import zlib
+import json
+
+with pikepdf.open("resume.pdf") as pdf:
+    meta = pdf.open_metadata()
+    encoded = meta.get("resume:payload")
+
+    if encoded:
+        decoded = zlib.decompress(base64.b64decode(encoded))
+        data = json.loads(decoded)
+        print(data)''')
+    st.subheader("XMP Metadata")
+    st.code('''
+<rdf:Description
+    xmlns:resume="https://example.com/ai-resume"
+    resume:version="1"
+    resume:format="json+zlib+base64"
+    resume:payload="ENCODED_JSON_PAYLOAD"
+/>''')
+    st.subheader("Decoded JSON Metadata Example")
+    st.code('''
+{
+  "name": "Candidate Name",
+  "email": "candidate@email.com",
+  "phone": "+91-XXXXXXXXXX",
+  "skills": [
+    "Python",
+    "SQL",
+    "Machine Learning"
+  ],
+  "experience": [
+    {
+      "company": "Company Name",
+      "role": "Job Title",
+      "duration": "2022 - 2024"
+    }
+  ],
+  "education": [
+    {
+      "degree": "Bachelor of Technology",
+      "institution": "University Name"
+    }
+  ]
+}
+''')
