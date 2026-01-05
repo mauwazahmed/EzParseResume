@@ -64,7 +64,7 @@ Do not include explanations. Return the output in JSON format only.
 
 # ---------------- UI ----------------
 
-st.set_page_config(page_title="IRIS")
+st.set_page_config(page_title="IRIS",page_icon="📄",layout="centered")
 st.title("IRIS — Intelligent Resume Interchange Standard")
 tab1, tab2 = st.tabs(["Candidate", "Recruiter / ATS Docs"])
 
@@ -73,7 +73,18 @@ tab1, tab2 = st.tabs(["Candidate", "Recruiter / ATS Docs"])
 # ======================================================
 
 with tab1:
-    st.header("Welcome to IRIS!")
+    st.subheader("Welcome to IRIS!")
+    st.markdown(
+    """
+    **Make your resume work smarter.**
+
+    See how your resume looks after parsing, add richer information without clutter,
+    and ensure it is both **human-friendly** and **machine-readable**.
+
+    Stop worrying about incomplete or erroneous parsing and
+    **simplify your entire resume workflow** — from upload to optimization.
+    """
+)
     uploaded = st.file_uploader("Upload PDF resume", type=["pdf"], help="Upload your resume in PDF format only")
     if uploaded:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
@@ -228,6 +239,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
