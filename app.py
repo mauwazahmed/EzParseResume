@@ -9,7 +9,6 @@ import os
 from openai import OpenAI
 
 # ---------------- CONFIG ----------------
-XMP_NAMESPACE = "https://example.com/ai-resume"
 
 client = OpenAI(api_key=st.secrets.get("OPENAI_API_KEY"))
 
@@ -19,8 +18,6 @@ def extract_visible_text(pdf_path):
     doc = fitz.open(pdf_path)
     return "\n".join(page.get_text() for page in doc)
 
-def has_metadata_marker(text):
-    return METADATA_MARKER in text
 
 def extract_xmp_metadata(pdf_path):
     with pikepdf.open(pdf_path) as pdf:
@@ -43,19 +40,6 @@ def embed_xmp_metadata(pdf_path, metadata_json):
             meta["resume:format"] = "json+zlib+base64"
             meta["resume:payload"] = encoded
         pdf.save(pdf_path)
-
-def add_footer_marker(pdf_path):
-    doc = fitz.open(pdf_path)
-
-    for page in doc:
-        page.insert_text(
-            (10, page.rect.height - 10),
-            METADATA_MARKER,
-            fontsize=5,
-            color=(1, 1, 1)  # white
-        )
-
-    doc.saveIncr()
 
 
 def parse_resume_with_openai(raw_text: str) -> dict:
@@ -80,7 +64,7 @@ Do not include explanations. Return the output in JSON format only.
 
 # ---------------- UI ----------------
 
-st.set_page_config(page_title="IRIS", layout="wide")
+st.set_page_config(page_title="IRIS")
 st.title("IRIS — Intelligent Resume Interchange Standard")
 tab1, tab2 = st.tabs(["Candidate", "Recruiter / ATS Docs"])
 
@@ -128,7 +112,7 @@ with tab1:
             st.download_button(
                 "⬇ Download Updated Resume",
                 f,
-                file_name=pdf_path,
+                file_name=pdf_path.title,
                 mime="application/pdf"
             )
 
@@ -244,4 +228,5 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
