@@ -318,7 +318,6 @@ with tab1:
             tmp.write(uploaded.read())
             pdf_path = tmp.name
 
-        text = extract_visible_text(pdf_path)
         metadata = extract_xmp_metadata(pdf_path)
         if metadata is not None:
             print(metadata)
@@ -329,6 +328,7 @@ with tab1:
             st.warning("❌ The resume does not have parsed metadata.")
             if st.button("🔍 Parse Resume with AI"):
                 with st.spinner("Parsing resume..."):
+                    text = extract_visible_text(pdf_path)
                     metadata = parse_resume_with_openai(text)
 
         st.subheader("📦 Resume Metadata (Editable)")
@@ -487,6 +487,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
