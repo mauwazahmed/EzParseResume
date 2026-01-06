@@ -59,6 +59,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
       "properties": {
         "name": {
           "type": "object",
+            "additionalProperties":False,
           "properties": {
             "first": {
               "type": "string"
@@ -76,6 +77,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
         },
         "contact": {
           "type": "object",
+            "additionalProperties":False,
           "properties": {
             "email": {
               "type": "string",
@@ -90,7 +92,8 @@ def parse_resume_with_openai(raw_text: str) -> dict:
           }
         },
         "location": {
-          "type": "object",
+          "type": "object"
+            "additionalProperties":False,,
           "properties": {
             "city": {
               "type": "string"
@@ -211,6 +214,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
           },
           "grade": {
             "type": "object",
+              "additionalProperties":False,
             "properties": {
               "type": {
                 "type": "string"
@@ -528,6 +532,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
