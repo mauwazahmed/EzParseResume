@@ -7,6 +7,7 @@ import zlib
 import tempfile
 import os
 from openai import OpenAI
+import time
 
 # ---------------- CONFIG ----------------
 
@@ -272,6 +273,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
