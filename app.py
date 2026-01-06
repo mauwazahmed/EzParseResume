@@ -43,7 +43,7 @@ def embed_xmp_metadata(pdf_path, metadata_json):
 
 
 def parse_resume_with_openai(raw_text: str) -> dict:
-    ASSISTANT_ID = st.secrets["ASSISTANT_ID"]
+    ASSISTANT_ID = st.secrets.get("ASSISTANT_ID")
     prompt = f"""{raw_text}"""
     
     thread = client.beta.threads.create()
@@ -257,6 +257,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
