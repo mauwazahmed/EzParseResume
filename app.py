@@ -166,7 +166,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
           "role": { "type": ["string", "null"] },
           "employment_type": {
             "type": ["string", "null"],
-            "enum": ["intern", "fulltime", "contract", "freelance", "part-time", null]
+            "enum": ["intern", "fulltime", "contract", "freelance", "part-time", "null"]
           },
           "location": { "type": ["string", "null"] },
           "start_date": { "type": ["string", "null"], "format": "date" },
@@ -487,6 +487,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
