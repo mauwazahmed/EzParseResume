@@ -44,7 +44,7 @@ def embed_xmp_metadata(pdf_path, metadata_json):
 
 
 def parse_resume_with_openai(raw_text: str) -> dict:
-    schema = {
+    schema = {"type":"object","properties":{
     "basics": {
       "type": "object",
       "required": [
@@ -308,7 +308,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
       "items": {
         "type": "string"
       }
-    }}
+    }}}
     system_prompt = f"""You are a resume parser. Extract all resume details including headers and corresponding information.
                 For dates or years, use start_date and end_date fields. Use clear key-value pairs.
                 Do not return any information which is not there in the user text. Return the output in JSON format only.\n\n
@@ -517,6 +517,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
