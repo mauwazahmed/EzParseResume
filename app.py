@@ -54,6 +54,21 @@ def parse_resume_with_openai(raw_text: str) -> dict:
         thread_id=thread.id,
         assistant_id=ASSISTANT_ID
     )
+    while True:
+        run_status = client.beta.threads.runs.retrieve(
+                    thread_id=thread.id,
+                    run_id=run.id)
+
+        if run_status.status == "completed":
+            break
+        elif run_status.status in ["failed", "cancelled"]:
+            raise RuntimeError("Assistant run failed")
+
+        time.sleep(0.4)
+
+    #messages = client.beta.threads.messages.list(thread_id=thread.id)
+
+    
     messages = client.beta.threads.messages.list(order="desc", limit=1,thread_id=thread.id,run_id=run.id)
     print(messages)
     reply = messages.data.content.text
@@ -257,6 +272,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
