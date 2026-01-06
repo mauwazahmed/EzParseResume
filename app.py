@@ -92,8 +92,8 @@ def parse_resume_with_openai(raw_text: str) -> dict:
           }
         },
         "location": {
-          "type": "object"
-            "additionalProperties":False,,
+          "type": "object",
+            "additionalProperties":False,
           "properties": {
             "city": {
               "type": "string"
@@ -532,6 +532,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
