@@ -325,8 +325,6 @@ with tab1:
 
         else:
             st.warning("❌ The resume does not have parsed metadata.")
-            metadata = {}
-
             if st.button("🔍 Parse Resume with AI"):
                 with st.spinner("Parsing resume..."):
                     metadata = parse_resume_with_openai(text)
@@ -487,6 +485,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
