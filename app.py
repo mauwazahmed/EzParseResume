@@ -56,7 +56,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
         assistant_id=ASSISTANT_ID
     )
     messages = client.beta.threads.messages.list(order="desc", limit=1,thread_id=thread.id,run_id=run.id)
-    reply = messages.data[0].content[0].text
+    reply = messages.data.content[0].text
 
     return json.loads(reply)
 # ---------------- UI ----------------
@@ -257,6 +257,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
