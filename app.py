@@ -112,7 +112,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
 
         "portfolio": {
           "type": "array",
-          "items": { "type": ["string", "null"], "format": "uri" }
+          "items": { "type": ["string", "null"]}
         },
 
         "date_of_birth": {
@@ -226,7 +226,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
             "type": "array",
             "items": { "type": ["string", "null"] }
           },
-          "link": { "type": ["string", "null"], "format": "uri" }
+          "link": { "type": ["string", "null"]}
         }
       }
     },
@@ -267,7 +267,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
           "provider": { "type": ["string", "null"] },
           "issue_date": { "type": ["string", "null"], "format": "date" },
           "expiry_date": { "type": ["string", "null"], "format": "date" },
-          "credential_link": { "type": ["string", "null"], "format": "uri" }
+          "credential_link": { "type": ["string", "null"]}
         }
       }
     },
@@ -487,6 +487,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
