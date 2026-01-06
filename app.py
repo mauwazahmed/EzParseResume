@@ -207,7 +207,7 @@ Do not include explanations. Return the output in JSON format only.
       "items": { "type": "string" }
     }
 }
-}
+}}
     )
 
     return json.loads(response.choices[0].message.content)
@@ -276,6 +276,27 @@ with tab1:
                 file_name=uploaded.name,
                 mime="application/pdf"
             )
+        st.divider()
+        st.subheader("Feedback")
+        st.markdown(
+        """
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="https://forms.gle/L5RQULW5y4TEraG39" target="_blank">
+                <button style="
+                    background-color:#4CAF50;
+                    color:white;
+                    padding:10px 20px;
+                    border:none;
+                    border-radius:6px;
+                    font-size:16px;
+                    cursor:pointer;">
+                    💬 Share Feedback
+                </button>
+            </a>
+        </div>
+        """,
+        unsafe_allow_html=True
+        )
 
 # ======================================================
 # TAB 2 — RECRUITER / ATS DOCS
@@ -389,6 +410,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
