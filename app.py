@@ -53,11 +53,161 @@ Do not include explanations. Return the output in JSON format only.
     response = client.chat.completions.create(
         model="gpt-4.1-nano",
         temperature=0,
-        response_format={"type": "json_object"},
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt}
-        ]
+        ],
+        response_format={"type": "json_schema",
+                         "json_schema": {
+    "basics": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "object",
+          "properties": {
+            "first": { "type": "string" },
+            "middle": { "type": "string" },
+            "last": { "type": "string" },
+            "full": { "type": "string" }
+          }
+        },
+        "contact": {
+          "type": "object",
+          "properties": {
+            "email": { "type": "string", "format": "email" },
+            "phone": { "type": "string" },
+            "alternate_phone": { "type": "string" }
+          }
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "city": { "type": "string" },
+            "state": { "type": "string" },
+            "country": { "type": "string" }
+          }
+        },
+        "portfolio": {
+          "type": "object",
+          "additionalProperties": True
+        }
+      }
+    },
+
+    "summary": { "type": "string" },
+
+    "skills": {
+      "type": "object",
+      "properties": {
+        "technical/tools": { "type": "array", "items": { "type": "string" } },
+        "soft": { "type": "array", "items": { "type": "string" } },
+        "languages": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "work_experience": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["company", "role"],
+        "properties": {
+          "company": { "type": "string" },
+          "role": { "type": "string" },
+          "employment_type": {
+            "type": "string",
+            "enum": ["intern", "fulltime", "contract", "freelance", "part-time"]
+          },
+          "location": { "type": "string"},
+          "start_date": { "type": "string","format":"date" },
+          "end_date": { "type": "string","format":"date" },
+          "is_current": { "type": "boolean" },
+          "description": {"type": "string"}
+        }
+      }
+    },
+
+    "education": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["institution", "course"],
+        "properties": {
+          "institution": { "type": "string" },
+          "course": { "type": "string" },
+          "start_date": { "type": "string","format":"date" },
+          "end_date": { "type": "string","format":"date" },
+          "grade": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "value": { "type": "number" },
+              "scale": { "type": "number" }
+            }
+          },
+          "main_subjects": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "tools/technologies": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "link": { "type": "string", "format": "uri" }
+        }
+      }
+    },
+
+    "extra_curricular": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": { "type": "string" },
+          "organization": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+
+    "achievements": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "certifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "provider": { "type": "string" },
+          "issue_date": { "type": "string","format":"date" },
+          "expiry_date": { "type": "string","format":"date" },
+          "credential_link": { "type": "string", "format": "uri" }
+        }
+      }
+    },
+
+    "hobbies": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+}
+}
     )
 
     return json.loads(response.choices[0].message.content)
@@ -239,6 +389,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
