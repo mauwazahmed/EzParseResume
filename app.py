@@ -12,7 +12,6 @@ import time
 # ---------------- CONFIG ----------------
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-ASSISTANT_ID = st.secrets["ASSISTANT_ID"]
 
 # ---------------- HELPERS ----------------
 
@@ -45,36 +44,281 @@ def embed_xmp_metadata(pdf_path, metadata_json):
 
 
 def parse_resume_with_openai(raw_text: str) -> dict:
-    prompt = f"""{raw_text}"""
-    thread = client.beta.threads.create()
-    client.beta.threads.messages.create(
-    thread_id=thread.id,
-    role="user",
-    content=prompt)
-    run = client.beta.threads.runs.create(
-        thread_id=thread.id,
-        assistant_id=ASSISTANT_ID
-    )
-    while True:
-        run_status = client.beta.threads.runs.retrieve(
-                    thread_id=thread.id,
-                    run_id=run.id)
-
-        if run_status.status == "completed":
-            break
-        elif run_status.status in ["failed", "cancelled"]:
-            raise RuntimeError("Assistant run failed")
-
-        time.sleep(0.4)
-
-    #messages = client.beta.threads.messages.list(thread_id=thread.id)
-
-    
-    messages = client.beta.threads.messages.list(order="desc", limit=1,thread_id=thread.id,run_id=run.id)
-    print(messages)
-    reply = messages.data[0].content[0].text.value
-
-    return json.loads(reply)
+    schema = {
+    "basics": {
+      "type": "object",
+      "required": [
+        "name",
+        "contact"
+      ],
+      "properties": {
+        "name": {
+          "type": "object",
+          "properties": {
+            "first": {
+              "type": "string"
+            },
+            "middle": {
+              "type": "string"
+            },
+            "last": {
+              "type": "string"
+            },
+            "full": {
+              "type": "string"
+            }
+          }
+        },
+        "contact": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "phone": {
+              "type": "string"
+            },
+            "alternate_phone": {
+              "type": "string"
+            }
+          }
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string"
+            },
+            "state": {
+              "type": "string"
+            },
+            "country": {
+              "type": "string"
+            }
+          }
+        },
+        "summary": {
+          "type": "string"
+        },
+        "portfolio": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      }
+    },
+    "skills": {
+      "type": "object",
+      "properties": {
+        "technical/tools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "soft": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "languages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "work_experience": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "company",
+          "role"
+        ],
+        "properties": {
+          "company": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "employment_type": {
+            "type": "string",
+            "enum": [
+              "intern",
+              "fulltime",
+              "contract",
+              "freelance",
+              "part-time"
+            ]
+          },
+          "location": {
+            "type": "string"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "is_current": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "education": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "institution",
+          "course"
+        ],
+        "properties": {
+          "institution": {
+            "type": "string"
+          },
+          "course": {
+            "type": "string"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "grade": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              },
+              "scale": {
+                "type": "number"
+              }
+            }
+          },
+          "main_subjects": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "tools/technologies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "link": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      }
+    },
+    "extra_curricular": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "organization": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "achievements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "certifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "issue_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "expiry_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "credential_link": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      }
+    },
+    "hobbies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }}
+    prompt = f"""You are a resume parser. Extract all resume details including headers and corresponding information.
+                For dates or years, use start_date and end_date fields. Use clear key-value pairs.
+                Do not return any information which is not there in the user text. Return the output in JSON format only.\n\n
+                Resume Text - \n
+                {raw_text}"""
+    response = client.responses.create(
+          model="gpt-4.1-nano",
+          input=prompt, 
+          text=schema)
+    return json.loads(response.output_text)
 # ---------------- UI ----------------
 
 st.set_page_config(page_title="IRIS",page_icon="📄",layout="centered")
@@ -273,6 +517,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
