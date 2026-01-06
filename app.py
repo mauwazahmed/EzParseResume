@@ -318,6 +318,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
           model="gpt-4.1-nano",
           input=prompt, 
           text=schema)
+    print(response)
     return json.loads(response.output_text)
 # ---------------- UI ----------------
 
@@ -517,6 +518,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
