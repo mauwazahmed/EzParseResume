@@ -309,16 +309,14 @@ def parse_resume_with_openai(raw_text: str) -> dict:
         "type": "string"
       }
     }}
-    prompt = f"""You are a resume parser. Extract all resume details including headers and corresponding information.
+    system_prompt = f"""You are a resume parser. Extract all resume details including headers and corresponding information.
                 For dates or years, use start_date and end_date fields. Use clear key-value pairs.
                 Do not return any information which is not there in the user text. Return the output in JSON format only.\n\n
-                Resume Text - \n
-                {raw_text}"""
+                """
     response = client.responses.create(
           model="gpt-4.1-nano",
-          input=prompt, 
-          text=schema)
-    print(response)
+          input=[{"role":"system","content":system_prompt},{"role":"user","content":raw_text}], 
+          text_format=schema)
     return json.loads(response.output_text)
 # ---------------- UI ----------------
 
@@ -518,6 +516,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
