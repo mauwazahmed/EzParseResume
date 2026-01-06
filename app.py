@@ -316,9 +316,9 @@ def parse_resume_with_openai(raw_text: str) -> dict:
     response = client.responses.parse(
           model="gpt-4.1-nano",
           input=[{"role":"system","content":system_prompt},{"role":"user","content":raw_text}], 
-          text={ "format": { "type": "json_schema", "strict": True, "schema":schema}}
+          text={"format": {"type": "json_schema","name":"iris", "strict": True, "schema":schema}}
     )
-    return json.loads(response.output_parsed)
+    return json.loads(response.output_text)
 # ---------------- UI ----------------
 
 st.set_page_config(page_title="IRIS",page_icon="📄",layout="centered")
@@ -517,6 +517,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
