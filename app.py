@@ -320,8 +320,6 @@ with tab1:
 
         metadata = extract_xmp_metadata(pdf_path)
         if metadata is not None:
-            print(metadata)
-            print(type(metadata))
             st.success("✅ Parsed metadata detected in resume")
 
         else:
@@ -487,6 +485,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
