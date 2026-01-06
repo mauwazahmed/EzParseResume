@@ -10,7 +10,8 @@ from openai import OpenAI
 
 # ---------------- CONFIG ----------------
 
-client = OpenAI(api_key=st.secrets.get("OPENAI_API_KEY"))
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+ASSISTANT_ID = st.secrets["ASSISTANT_ID"]
 
 # ---------------- HELPERS ----------------
 
@@ -43,9 +44,7 @@ def embed_xmp_metadata(pdf_path, metadata_json):
 
 
 def parse_resume_with_openai(raw_text: str) -> dict:
-    ASSISTANT_ID = st.secrets.get("ASSISTANT_ID")
     prompt = f"""{raw_text}"""
-    
     thread = client.beta.threads.create()
     client.beta.threads.messages.create(
     thread_id=thread.id,
@@ -258,6 +257,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
