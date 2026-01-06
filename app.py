@@ -313,10 +313,11 @@ def parse_resume_with_openai(raw_text: str) -> dict:
                 For dates or years, use start_date and end_date fields. Use clear key-value pairs.
                 Do not return any information which is not there in the user text. Return the output in JSON format only.\n\n
                 """
-    response = client.responses.create(
+    response = client.responses.parse(
           model="gpt-4.1-nano",
           input=[{"role":"system","content":system_prompt},{"role":"user","content":raw_text}], 
-          text_format=schema)
+          text_format=schema,
+    )
     return json.loads(response.output_text)
 # ---------------- UI ----------------
 
@@ -516,6 +517,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
