@@ -44,7 +44,11 @@ def embed_xmp_metadata(pdf_path, metadata_json):
 
 
 def parse_resume_with_openai(raw_text: str) -> dict:
-    schema = {"name":"iris","type":"object","strict":true,"additionalProperties":false,"properties":{
+    schema = {"name":"iris",
+              "type":"object",
+              "strict":True,
+              "additionalProperties":False,
+    "properties":{
     "basics": {
       "type": "object",
       "required": [
@@ -517,6 +521,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
