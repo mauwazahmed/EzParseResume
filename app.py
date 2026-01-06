@@ -44,286 +44,212 @@ def embed_xmp_metadata(pdf_path, metadata_json):
 
 
 def parse_resume_with_openai(raw_text: str) -> dict:
-    schema = {"name":"iris",
-              "type":"object",
-              "strict":True,
-              "additionalProperties":False,
-    "properties":{
+    schema = 
+        {"$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [],
+  "additionalProperties": false,
+  "properties": {
+
     "basics": {
       "type": "object",
-        "additionalProperties":False,
-      "required": [
-        "name",
-        "contact"
-      ],
+      "required": ["name", "contact"],
+      "additionalProperties": false,
       "properties": {
+
         "name": {
           "type": "object",
-            "additionalProperties":False,
+          "required": [],
+          "additionalProperties": false,
           "properties": {
-            "first": {
-              "type": "string"
-            },
-            "middle": {
-              "type": "string"
-            },
-            "last": {
-              "type": "string"
-            },
-            "full": {
-              "type": "string"
-            }
+            "first": { "type": "string" },
+            "middle": { "type": "string" },
+            "last": { "type": "string" },
+            "full": { "type": "string" }
           }
         },
+
         "contact": {
           "type": "object",
-            "additionalProperties":False,
+          "required": [],
+          "additionalProperties": false,
           "properties": {
-            "email": {
-              "type": "string",
-              "format": "email"
-            },
-            "phone": {
-              "type": "string"
-            },
-            "alternate_phone": {
-              "type": "string"
-            }
+            "email": { "type": "string", "format": "email" },
+            "phone": { "type": "string" },
+            "alternate_phone": { "type": "string" }
           }
         },
+
         "location": {
           "type": "object",
-            "additionalProperties":False,
+          "required": [],
+          "additionalProperties": false,
           "properties": {
-            "city": {
-              "type": "string"
-            },
-            "state": {
-              "type": "string"
-            },
-            "country": {
-              "type": "string"
-            }
+            "city": { "type": "string" },
+            "state": { "type": "string" },
+            "country": { "type": "string" }
           }
         },
-        "summary": {
-          "type": "string"
-        },
+
+        "summary": { "type": "string" },
+
         "portfolio": {
           "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uri"
-          }
+          "items": { "type": "string", "format": "uri" }
         }
       }
     },
+
     "skills": {
       "type": "object",
-        "additionalProperties":False,
+      "required": [],
+      "additionalProperties": false,
       "properties": {
-        "technical/tools": {
+
+        "technical_tools": {
           "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "items": { "type": "string" }
         },
+
         "soft": {
           "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "items": { "type": "string" }
         },
+
         "languages": {
           "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "items": { "type": "string" }
         }
       }
     },
+
     "work_experience": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": [
-          "company",
-          "role"
-        ],
-          "additionalProperties":False,
+        "required": ["company", "role"],
+        "additionalProperties": false,
         "properties": {
-          "company": {
-            "type": "string"
-          },
-          "role": {
-            "type": "string"
-          },
+
+          "company": { "type": "string" },
+          "role": { "type": "string" },
+
           "employment_type": {
             "type": "string",
-            "enum": [
-              "intern",
-              "fulltime",
-              "contract",
-              "freelance",
-              "part-time"
-            ]
+            "enum": ["intern", "fulltime", "contract", "freelance", "part-time"]
           },
-          "location": {
-            "type": "string"
-          },
-          "start_date": {
-            "type": "string",
-            "format": "date"
-          },
-          "end_date": {
-            "type": "string",
-            "format": "date"
-          },
-          "is_current": {
-            "type": "boolean"
-          },
-          "description": {
-            "type": "string"
-          }
+
+          "location": { "type": "string" },
+
+          "start_date": { "type": "string", "format": "date" },
+          "end_date": { "type": "string", "format": "date" },
+
+          "is_current": { "type": "boolean" },
+
+          "description": { "type": "string" }
         }
       }
     },
+
     "education": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": [
-          "institution",
-          "course"
-        ],
-          "additionalProperties":False,
+        "required": ["institution", "course"],
+        "additionalProperties": false,
         "properties": {
-          "institution": {
-            "type": "string"
-          },
-          "course": {
-            "type": "string"
-          },
-          "start_date": {
-            "type": "string",
-            "format": "date"
-          },
-          "end_date": {
-            "type": "string",
-            "format": "date"
-          },
+
+          "institution": { "type": "string" },
+          "course": { "type": "string" },
+
+          "start_date": { "type": "string", "format": "date" },
+          "end_date": { "type": "string", "format": "date" },
+
           "grade": {
             "type": "object",
-              "additionalProperties":False,
+            "required": [],
+            "additionalProperties": false,
             "properties": {
-              "type": {
-                "type": "string"
-              },
-              "value": {
-                "type": "number"
-              },
-              "scale": {
-                "type": "number"
-              }
+              "type": { "type": "string" },
+              "value": { "type": "number" },
+              "scale": { "type": "number" }
             }
           },
+
           "main_subjects": {
             "type": "array",
-            "items": {
-              "type": "string"
-            }
+            "items": { "type": "string" }
           }
         }
       }
     },
+
     "projects": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": [
-          "title"
-        ],
-          "additionalProperties":False,
+        "required": ["title"],
+        "additionalProperties": false,
         "properties": {
-          "title": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "tools/technologies": {
+
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+
+          "tools_technologies": {
             "type": "array",
-            "items": {
-              "type": "string"
-            }
+            "items": { "type": "string" }
           },
-          "link": {
-            "type": "string",
-            "format": "uri"
-          }
+
+          "link": { "type": "string", "format": "uri" }
         }
       }
     },
+
     "extra_curricular": {
       "type": "array",
       "items": {
         "type": "object",
-          "additionalProperties":False,
+        "required": [],
+        "additionalProperties": false,
         "properties": {
-          "role": {
-            "type": "string"
-          },
-          "organization": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          }
+
+          "role": { "type": "string" },
+          "organization": { "type": "string" },
+          "description": { "type": "string" }
         }
       }
     },
+
     "achievements": {
       "type": "array",
-      "items": {
-        "type": "string"
-      }
+      "items": { "type": "string" }
     },
+
     "certifications": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": [
-          "name"
-        ],
-          "additionalProperties":False,
+        "required": ["name"],
+        "additionalProperties": false,
         "properties": {
-          "name": {
-            "type": "string"
-          },
-          "provider": {
-            "type": "string"
-          },
-          "issue_date": {
-            "type": "string",
-            "format": "date"
-          },
-          "expiry_date": {
-            "type": "string",
-            "format": "date"
-          },
-          "credential_link": {
-            "type": "string",
-            "format": "uri"
-          }
+
+          "name": { "type": "string" },
+          "provider": { "type": "string" },
+
+          "issue_date": { "type": "string", "format": "date" },
+          "expiry_date": { "type": "string", "format": "date" },
+
+          "credential_link": { "type": "string", "format": "uri" }
         }
       }
     },
+
     "hobbies": {
       "type": "array",
-      "items": {
-        "type": "string"
-      }
-    }}}
+      "items": { "type": "string" }
+    }
+  }
+}
     system_prompt = f"""You are a resume parser. Extract all resume details including headers and corresponding information.
                 For dates or years, use start_date and end_date fields. Use clear key-value pairs.
                 Do not return any information which is not there in the user text. Return the output in JSON format only.\n\n
@@ -532,6 +458,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
