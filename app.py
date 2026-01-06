@@ -44,10 +44,7 @@ def embed_xmp_metadata(pdf_path, metadata_json):
 
 
 def parse_resume_with_openai(raw_text: str) -> dict:
-    schema = {"type":"object",
-              "strict":True,
-              "additionalProperties":False,
-              "properties":{
+    schema = {
     "basics": {
       "type": "object",
       "required": [
@@ -311,7 +308,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
       "items": {
         "type": "string"
       }
-    }}}
+    }}
     system_prompt = f"""You are a resume parser. Extract all resume details including headers and corresponding information.
                 For dates or years, use start_date and end_date fields. Use clear key-value pairs.
                 Do not return any information which is not there in the user text. Return the output in JSON format only.\n\n
@@ -319,7 +316,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
     response = client.responses.create(
           model="gpt-4.1-nano",
           input=[{"role":"system","content":system_prompt},{"role":"user","content":raw_text}], 
-          text={"format": {"type": "json_schema","name":"iris", "strict": True, "schema":schema}}
+          text={"format": {"type": "json_schema","name":"iris", "strict": True,"additionalProperties":False,"type":"object", "schema":schema}}
     )
     return json.loads(response.output_text)
 # ---------------- UI ----------------
@@ -520,6 +517,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
