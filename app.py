@@ -51,6 +51,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
     "properties":{
     "basics": {
       "type": "object",
+        "additionalProperties":False,
       "required": [
         "name",
         "contact"
@@ -116,6 +117,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
     },
     "skills": {
       "type": "object",
+        "additionalProperties":False,
       "properties": {
         "technical/tools": {
           "type": "array",
@@ -145,6 +147,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
           "company",
           "role"
         ],
+          "additionalProperties":False,
         "properties": {
           "company": {
             "type": "string"
@@ -190,6 +193,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
           "institution",
           "course"
         ],
+          "additionalProperties":False,
         "properties": {
           "institution": {
             "type": "string"
@@ -235,6 +239,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
         "required": [
           "title"
         ],
+          "additionalProperties":False,
         "properties": {
           "title": {
             "type": "string"
@@ -259,6 +264,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
       "type": "array",
       "items": {
         "type": "object",
+          "additionalProperties":False,
         "properties": {
           "role": {
             "type": "string"
@@ -285,6 +291,7 @@ def parse_resume_with_openai(raw_text: str) -> dict:
         "required": [
           "name"
         ],
+          "additionalProperties":False,
         "properties": {
           "name": {
             "type": "string"
@@ -521,6 +528,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
