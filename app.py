@@ -57,8 +57,8 @@ Do not include explanations. Return the output in JSON format only.
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt}
         ],
-        response_format={"type": "json_schema",
-                         "json_schema": {
+        response_format={"type": "json_object",
+                         "json_schema": {"name":"resume_schema","schema":
     "basics": {
       "type": "object",
       "required": ["name"],
@@ -389,6 +389,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
