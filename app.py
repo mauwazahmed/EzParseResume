@@ -35,7 +35,7 @@ def embed_xmp_metadata(pdf_path, metadata_json):
         zlib.compress(json.dumps(metadata_json).encode())
     ).decode()
 
-    with pikepdf.open(pdf_path) as pdf:
+    with pikepdf.open(pdf_path,allow_overwriting_input=True) as pdf:
         with pdf.open_metadata(set_pikepdf_as_editor=True) as meta:
             meta["resume:version"] = "1"
             meta["resume:format"] = "json+zlib+base64"
@@ -485,6 +485,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
