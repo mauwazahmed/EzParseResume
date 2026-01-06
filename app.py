@@ -20,15 +20,26 @@ def extract_visible_text(pdf_path):
     return "\n".join(page.get_text() for page in doc)
 
 
+# def extract_xmp_metadata(pdf_path):
+#     with pikepdf.open(pdf_path) as pdf:
+#         xmp = pdf.open_metadata()
+#         payload = xmp.get("resume:payload")
+#         if not payload:
+#             return None
+
+#         decoded = zlib.decompress(base64.b64decode(payload)).decode()
+#         return json.loads(decoded)
+
 def extract_xmp_metadata(pdf_path):
     with pikepdf.open(pdf_path) as pdf:
-        xmp = pdf.open_metadata()
-        payload = xmp.get("resume:payload")
-        if not payload:
-            return None
+        with pdf.open_metadata() as xmp:
+            if "resume:payload" not in xmp:
+                return None
 
-        decoded = zlib.decompress(base64.b64decode(payload)).decode()
-        return json.loads(decoded)
+            payload = xmp["resume:payload"]
+            decoded = zlib.decompress(base64.b64decode(payload)).decode()
+            return json.loads(decoded)
+            
 
 def embed_xmp_metadata(pdf_path, metadata_json):
     encoded = base64.b64encode(
@@ -347,7 +358,7 @@ with tab1:
         with open(pdf_path, "rb") as f:
             st.download_button(
                 "⬇ Download Updated Resume",
-                f,
+                f.read(),
                 file_name=uploaded.name,
                 mime="application/pdf"
             )
@@ -485,6 +496,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
