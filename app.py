@@ -44,80 +44,104 @@ def embed_xmp_metadata(pdf_path, metadata_json):
 
 
 def parse_resume_with_openai(raw_text: str) -> dict:
-    schema = {"$schema": "http://json-schema.org/draft-07/schema#",
+    schema = {
   "type": "object",
-  "required": [],
   "additionalProperties": False,
+  "required": [
+    "basics",
+    "skills",
+    "work_experience",
+    "education",
+    "projects",
+    "extra_curricular",
+    "achievements",
+    "certifications",
+    "hobbies"
+  ],
   "properties": {
 
     "basics": {
       "type": "object",
-      "required": ["name", "contact"],
       "additionalProperties": False,
+      "required": [
+        "name",
+        "contact",
+        "location",
+        "summary",
+        "portfolio",
+        "date_of_birth",
+        "years_of_experience"
+      ],
       "properties": {
 
         "name": {
           "type": "object",
-          "required": [],
           "additionalProperties": False,
+          "required": ["first", "middle", "last", "full"],
           "properties": {
-            "first": { "type": "string" },
-            "middle": { "type": "string" },
-            "last": { "type": "string" },
-            "full": { "type": "string" }
+            "first": { "type": ["string", "null"] },
+            "middle": { "type": ["string", "null"] },
+            "last": { "type": ["string", "null"] },
+            "full": { "type": ["string", "null"] }
           }
         },
 
         "contact": {
           "type": "object",
-          "required": [],
           "additionalProperties": False,
+          "required": ["email", "phone", "alternate_phone"],
           "properties": {
-            "email": { "type": "string", "format": "email" },
-            "phone": { "type": "string" },
-            "alternate_phone": { "type": "string" }
+            "email": { "type": ["string", "null"], "format": "email" },
+            "phone": { "type": ["string", "null"] },
+            "alternate_phone": { "type": ["string", "null"] }
           }
         },
 
         "location": {
           "type": "object",
-          "required": [],
           "additionalProperties": False,
+          "required": ["city", "state", "country"],
           "properties": {
-            "city": { "type": "string" },
-            "state": { "type": "string" },
-            "country": { "type": "string" }
+            "city": { "type": ["string", "null"] },
+            "state": { "type": ["string", "null"] },
+            "country": { "type": ["string", "null"] }
           }
         },
 
-        "summary": { "type": "string" },
+        "summary": { "type": ["string", "null"] },
 
         "portfolio": {
           "type": "array",
-          "items": { "type": "string", "format": "uri" }
+          "items": { "type": ["string", "null"], "format": "uri" }
+        },
+
+        "date_of_birth": {
+          "type": ["string", "null"],
+          "format": "date"
+        },
+
+        "years_of_experience": {
+          "type": ["number", "null"]
         }
       }
     },
 
     "skills": {
       "type": "object",
-      "required": [],
       "additionalProperties": False,
+      "required": ["technical_tools", "soft", "languages"],
       "properties": {
-
         "technical_tools": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": { "type": ["string", "null"] }
         },
-
         "soft": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": { "type": ["string", "null"] }
         },
-
         "languages": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": { "type": ["string", "null"] }
         }
       }
     },
@@ -126,26 +150,29 @@ def parse_resume_with_openai(raw_text: str) -> dict:
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["company", "role"],
         "additionalProperties": False,
+        "required": [
+          "company",
+          "role",
+          "employment_type",
+          "location",
+          "start_date",
+          "end_date",
+          "is_current",
+          "description"
+        ],
         "properties": {
-
-          "company": { "type": "string" },
-          "role": { "type": "string" },
-
+          "company": { "type": ["string", "null"] },
+          "role": { "type": ["string", "null"] },
           "employment_type": {
-            "type": "string",
-            "enum": ["intern", "fulltime", "contract", "freelance", "part-time"]
+            "type": ["string", "null"],
+            "enum": ["intern", "fulltime", "contract", "freelance", "part-time", null]
           },
-
-          "location": { "type": "string" },
-
-          "start_date": { "type": "string", "format": "date" },
-          "end_date": { "type": "string", "format": "date" },
-
-          "is_current": { "type": "boolean" },
-
-          "description": { "type": "string" }
+          "location": { "type": ["string", "null"] },
+          "start_date": { "type": ["string", "null"], "format": "date" },
+          "end_date": { "type": ["string", "null"], "format": "date" },
+          "is_current": { "type": ["boolean", "null"] },
+          "description": { "type": ["string", "null"] }
         }
       }
     },
@@ -154,30 +181,33 @@ def parse_resume_with_openai(raw_text: str) -> dict:
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["institution", "course"],
         "additionalProperties": False,
+        "required": [
+          "institution",
+          "course",
+          "start_date",
+          "end_date",
+          "grade",
+          "main_subjects"
+        ],
         "properties": {
-
-          "institution": { "type": "string" },
-          "course": { "type": "string" },
-
-          "start_date": { "type": "string", "format": "date" },
-          "end_date": { "type": "string", "format": "date" },
-
+          "institution": { "type": ["string", "null"] },
+          "course": { "type": ["string", "null"] },
+          "start_date": { "type": ["string", "null"], "format": "date" },
+          "end_date": { "type": ["string", "null"], "format": "date" },
           "grade": {
             "type": "object",
-            "required": [],
             "additionalProperties": False,
+            "required": ["type", "value", "scale"],
             "properties": {
-              "type": { "type": "string" },
-              "value": { "type": "number" },
-              "scale": { "type": "number" }
+              "type": { "type": ["string", "null"] },
+              "value": { "type": ["number", "null"] },
+              "scale": { "type": ["number", "null"] }
             }
           },
-
           "main_subjects": {
             "type": "array",
-            "items": { "type": "string" }
+            "items": { "type": ["string", "null"] }
           }
         }
       }
@@ -187,19 +217,16 @@ def parse_resume_with_openai(raw_text: str) -> dict:
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["title"],
         "additionalProperties": False,
+        "required": ["title", "description", "tools_technologies", "link"],
         "properties": {
-
-          "title": { "type": "string" },
-          "description": { "type": "string" },
-
+          "title": { "type": ["string", "null"] },
+          "description": { "type": ["string", "null"] },
           "tools_technologies": {
             "type": "array",
-            "items": { "type": "string" }
+            "items": { "type": ["string", "null"] }
           },
-
-          "link": { "type": "string", "format": "uri" }
+          "link": { "type": ["string", "null"], "format": "uri" }
         }
       }
     },
@@ -208,47 +235,50 @@ def parse_resume_with_openai(raw_text: str) -> dict:
       "type": "array",
       "items": {
         "type": "object",
-        "required": [],
         "additionalProperties": False,
+        "required": ["role", "organization", "description"],
         "properties": {
-
-          "role": { "type": "string" },
-          "organization": { "type": "string" },
-          "description": { "type": "string" }
+          "role": { "type": ["string", "null"] },
+          "organization": { "type": ["string", "null"] },
+          "description": { "type": ["string", "null"] }
         }
       }
     },
 
     "achievements": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": { "type": ["string", "null"] }
     },
 
     "certifications": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name"],
         "additionalProperties": False,
+        "required": [
+          "name",
+          "provider",
+          "issue_date",
+          "expiry_date",
+          "credential_link"
+        ],
         "properties": {
-
-          "name": { "type": "string" },
-          "provider": { "type": "string" },
-
-          "issue_date": { "type": "string", "format": "date" },
-          "expiry_date": { "type": "string", "format": "date" },
-
-          "credential_link": { "type": "string", "format": "uri" }
+          "name": { "type": ["string", "null"] },
+          "provider": { "type": ["string", "null"] },
+          "issue_date": { "type": ["string", "null"], "format": "date" },
+          "expiry_date": { "type": ["string", "null"], "format": "date" },
+          "credential_link": { "type": ["string", "null"], "format": "uri" }
         }
       }
     },
 
     "hobbies": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": { "type": ["string", "null"] }
     }
   }
 }
+
     system_prompt = f"""You are a resume parser. Extract all resume details including headers and corresponding information.
                 For dates or years, use start_date and end_date fields. Use clear key-value pairs.
                 Do not return any information which is not there in the user text. Return the output in JSON format only.\n\n
@@ -457,6 +487,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
