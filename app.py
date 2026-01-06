@@ -47,18 +47,10 @@ def parse_resume_with_openai(raw_text: str) -> dict:
     You are a resume parser. Extract all resume details including headers and corresponding information.
 For dates or years, use start_date and end_date fields. Use clear key-value pairs.
 Do not include explanations. Return the output in JSON format only.
-'''
-    prompt = f"""{raw_text}"""
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        temperature=0,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": prompt}
-        ],
-        response_format={"type": "json_object",
-                         "json_schema": {"name":"resume_schema","schema":{
+Reply strictly in the below schema/format - 
+
+"json_schema": {
     "basics": {
       "type": "object",
       "required": ["name"],
@@ -207,7 +199,17 @@ Do not include explanations. Return the output in JSON format only.
       "items": { "type": "string" }
     }
 }
-}}
+'''
+    prompt = f"""{raw_text}"""
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        temperature=0,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt}
+        ],
+        response_format={"type": "json_object"}
     )
 
     return json.loads(response.choices[0].message.content)
@@ -410,6 +412,7 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
 
