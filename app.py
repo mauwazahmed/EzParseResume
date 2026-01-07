@@ -6,12 +6,14 @@ import base64
 import zlib
 import tempfile
 import os
+from dotenv import load_dotenv
 from openai import OpenAI
 import time
 
+load_dotenv()
 # ---------------- CONFIG ----------------
 
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # ---------------- HELPERS ----------------
 
@@ -19,16 +21,6 @@ def extract_visible_text(pdf_path):
     doc = fitz.open(pdf_path)
     return "\n".join(page.get_text() for page in doc)
 
-
-# def extract_xmp_metadata(pdf_path):
-#     with pikepdf.open(pdf_path) as pdf:
-#         xmp = pdf.open_metadata()
-#         payload = xmp.get("resume:payload")
-#         if not payload:
-#             return None
-
-#         decoded = zlib.decompress(base64.b64decode(payload)).decode()
-#         return json.loads(decoded)
 
 def extract_xmp_metadata(pdf_path):
     with pikepdf.open(pdf_path) as pdf:
@@ -42,6 +34,7 @@ def extract_xmp_metadata(pdf_path):
             
 
 def embed_xmp_metadata(pdf_path, metadata_json):
+    print(type(metadata_json))
     encoded = base64.b64encode(
         zlib.compress(json.dumps(metadata_json).encode())
     ).decode()
@@ -51,6 +44,7 @@ def embed_xmp_metadata(pdf_path, metadata_json):
             meta["resume:version"] = "1"
             meta["resume:format"] = "json+zlib+base64"
             meta["resume:payload"] = encoded
+        
         pdf.save(pdf_path)
 
 
@@ -311,6 +305,11 @@ tab1, tab2 = st.tabs(["Candidate", "Recruiter / ATS Docs"])
 # ======================================================
 
 with tab1:
+    if "resume_metadata" not in st.session_state:
+        st.session_state.resume_metadata = None
+    if "metadata_editor" not in st.session_state:
+        st.session_state.metadata_editor = ""
+
     st.subheader("Welcome to IRIS!")
     st.markdown(
     """
@@ -329,28 +328,32 @@ with tab1:
             tmp.write(uploaded.read())
             pdf_path = tmp.name
 
-        metadata = extract_xmp_metadata(pdf_path)
-        if metadata is not None:
+        parsed = extract_xmp_metadata(pdf_path)
+        if parsed is not None:
             st.success("✅ Parsed metadata detected in resume")
+            st.session_state.resume_metadata = parsed
+            st.session_state.metadata_editor = json.dumps(parsed, indent=4)
 
         else:
             st.warning("❌ The resume does not have parsed metadata.")
             if st.button("🔍 Parse Resume with AI"):
                 with st.spinner("Parsing resume..."):
                     text = extract_visible_text(pdf_path)
-                    metadata = parse_resume_with_openai(text)
+                    parsed = parse_resume_with_openai(text)
+                    st.session_state.resume_metadata = parsed
+                    st.session_state.metadata_editor = json.dumps(parsed, indent=4)
+                st.success("✅ Resume parsed successfully!")
 
         st.subheader("📦 Resume Metadata (Editable)")
         metadata_str = st.text_area(
-            "Edit metadata JSON",
-            json.dumps(metadata, indent=4),
-            height=400
-        )
+                          "Edit metadata JSON",
+                          height=400,
+                          key="metadata_editor"
+                      )
 
         if st.button("💾 Save & Embed Metadata"):
             try:
-                final_metadata = json.loads(metadata_str)
-                embed_xmp_metadata(pdf_path, final_metadata)
+                embed_xmp_metadata(pdf_path, json.loads(st.session_state.metadata_editor))
                 st.success("Metadata embedded successfully!")
             except Exception as e:
                 st.error(f"Error: {e}")
@@ -358,7 +361,7 @@ with tab1:
         with open(pdf_path, "rb") as f:
             st.download_button(
                 "⬇ Download Updated Resume",
-                f.read(),
+                data=f,
                 file_name=uploaded.name,
                 mime="application/pdf"
             )
@@ -496,64 +499,4 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
