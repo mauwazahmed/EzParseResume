@@ -6,14 +6,12 @@ import base64
 import zlib
 import tempfile
 import os
-from dotenv import load_dotenv
 from openai import OpenAI
 import time
 
-load_dotenv()
 # ---------------- CONFIG ----------------
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # ---------------- HELPERS ----------------
 
@@ -498,5 +496,6 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
 
