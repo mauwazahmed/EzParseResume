@@ -34,7 +34,6 @@ def extract_xmp_metadata(pdf_path):
             
 
 def embed_xmp_metadata(pdf_path, metadata_json):
-    print(type(metadata_json))
     encoded = base64.b64encode(
         zlib.compress(json.dumps(metadata_json).encode())
     ).decode()
@@ -499,4 +498,5 @@ with pikepdf.open("resume.pdf") as pdf:
   ]
 }
 ''')
+
 
